@@ -36,5 +36,46 @@ namespace UnityModManager.Controls
         {
             BackRequested?.Invoke(this, EventArgs.Empty);
         }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (lbProfiles.SelectedItem == null)
+            {
+                MessageBox.Show("Please select a profile to export.");
+                return;
+            }
+
+            Profile selectedProfile = (Profile)lbProfiles.SelectedItem;
+
+            btnExport.Enabled = false;
+            btnExport.BackColor = Color.Gray;
+
+            lblExportStatus.Text = "Zipping profile...";
+
+            string archivePath = null;
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    archivePath = Program.ProfileManager.CompressProfile(selectedProfile);
+                    string binId = await FileBinOperations.UploadFileToBinAsync(archivePath);
+                    await FileBinOperations.LockBinAsync("123");
+                }
+                catch (Exception e)
+                {
+                    lblExportStatus.Text = "Failed to zip profile.";
+                    MessageBox.Show("Failed to zip profile: " + e.Message);
+                    throw;
+                }
+
+                this.Invoke((MethodInvoker)delegate
+                {
+                    lblExportStatus.Text = "Profile zipped successfully.";
+                });
+
+                MessageBox.Show(archivePath, "Profile Exported", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            });
+        }
     }
 }

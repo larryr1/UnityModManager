@@ -1,4 +1,6 @@
-﻿namespace UnityModManager.Objects.Lib
+﻿using System.Diagnostics;
+
+namespace UnityModManager.Objects.Lib
 {
     internal class DriveManagement
     {
@@ -11,12 +13,17 @@
 
         public static GameSelectItem[] FindSteamGames()
         {
-            string[] drives = Environment.GetLogicalDrives();
+            string[] drives = DriveInfo.GetDrives()
+            .Where(d => d.DriveType != DriveType.Network && d.IsReady)
+            .Select(d => d.Name)
+            .ToArray();
+            Debug.WriteLine("Got " + drives.Length + " drives");
 
             List<GameSelectItem> games = new List<GameSelectItem>();
 
             foreach (string drive in drives)
             {
+                Debug.WriteLine("Checking drive " + drive);
                 foreach (string potentialDirectory in potentialDirectories)
                 {
                     string steamPath = Path.Combine(drive, potentialDirectory);

@@ -1,4 +1,5 @@
-﻿using UnityModManager.Objects;
+﻿using System.Diagnostics;
+using UnityModManager.Objects;
 using UnityModManager.Objects.Lib;
 
 namespace UnityModManager.Forms
@@ -20,7 +21,9 @@ namespace UnityModManager.Forms
 
             Task.Run(() =>
             {
+                Debug.WriteLine("Starting search");
                 GameSelectItem[] items = DriveManagement.FindSteamGames();
+                Debug.WriteLine("Ended search");
 
                 // Update UI with the found games
                 this.Invoke((MethodInvoker)delegate
